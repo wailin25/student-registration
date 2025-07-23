@@ -1,0 +1,189 @@
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: 'Myanmar3', 'Padauk', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding-top: 60px;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            width: 210mm;
+            min-height: 297mm;
+            position: relative;
+        }
+        .university-logo {
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 15px;
+        }
+        .form-header h4 {
+            color: #0d6efd;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .year-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 14px;
+        }
+        .main-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .main-table td, .main-table th {
+            border: 1px solid #999;
+            color: #111 !important;
+            font-weight: 500;
+            padding: 8px;
+            vertical-align: middle;
+        }
+        .main-table label {
+            margin-bottom: 0;
+            font-weight: bold;
+        }
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        .photo-cell {
+            width: 120px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .image-preview-container {
+            width: 100px;
+            height: 125px;
+            margin: 0 auto;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        .image-preview {
+            width: 100px;
+            height: 125px;
+            object-fit: cover;
+        }
+        .exam-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .exam-table th {
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+            padding: 8px;
+        }
+        .exam-table td {
+            border: 1px solid #999 !important;
+            padding: 8px;
+        }
+        .form-control, .form-select {
+            border: 1px solid #999 !important;
+            color: #000 !important;
+            font-weight: 500;
+            background-color: #fff !important;
+            font-size: 14px;
+            padding: 6px;
+        }
+        .form-control-sm {
+            font-size: 13px;
+            padding: 4px 6px;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            font-size: 14px;
+            padding: 8px 20px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            font-size: 14px;
+            padding: 8px 20px;
+        }
+        .center {
+            text-align: center;
+        }
+        .declaration {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+        }
+        .declaration-item {
+            margin-bottom: 12px;
+            padding-left: 22px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .declaration-item:before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: #0d6efd;
+            border-radius: 50%;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 80%;
+            margin: 0 auto 10px;
+            padding-top: 8px;
+            text-align: center;
+        }
+        .progress-container {
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .form-container {
+                box-shadow: none;
+                border-radius: 0;
+                padding: 10px;
+                width: 100%;
+            }
+            .navigation {
+                display: none;
+            }
+        }
