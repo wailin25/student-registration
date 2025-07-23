@@ -1,0 +1,11 @@
+{
+    "name": "user/excel",
+    "autoload": {
+        "psr-4": {
+            "User\\Excel\\": "src/"
+        }
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^4.4"
+    }
+}
