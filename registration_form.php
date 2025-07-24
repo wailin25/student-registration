@@ -1,9 +1,70 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-
-require 'includes/header.php';
+require 'includes/db.php';
 require 'includes/student_navbar.php';
-require 'includes/db.php'; // Database connection file
+require 'includes/header.php';
+$studentData = null;
+$examData = null;
+
+// Check if form is submitted or serial number is entered
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['serial_no'])) {
+    // Get serial number from form
+    $serialNo = trim($_POST['serial_no']);
+    
+    // Debug output
+    echo "<script>console.log('Searching for student with serial no:', '" . addslashes($serialNo) . "');</script>";
+    
+    // Fetch student data from database
+    $stmt = $mysqli->prepare("SELECT * FROM students WHERE serial_no = ?");
+    if (!$stmt) {
+        die("Prepare failed: " . $mysqli->error);
+    }
+    
+    $stmt->bind_param("i", $serialNo);
+    if (!$stmt->execute()) {
+        die("Execute failed: " . $stmt->error);
+    }
+    
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $studentData = $result->fetch_assoc();
+        echo "<script>console.log('Student data found:', " . json_encode($studentData) . ");</script>";
+        
+        // Fetch exam data
+        $examStmt = $mysqli->prepare("SELECT * FROM answered_exam WHERE serial_no = ?");
+        $examStmt->bind_param("i", $studentData['serial_no']);
+        if (!$examStmt->execute()) {
+            die("Exam query failed: " . $examStmt->error);
+        }
+        $examResult = $examStmt->get_result();
+        
+        if ($examResult->num_rows > 0) {
+            $examData = $examResult->fetch_assoc();
+            echo "<script>console.log('Exam data found:', " . json_encode($examData) . ");</script>";
+        }
+    } else {
+        echo "<script>alert('ကျေးဇူးပြု၍ မှန်ကန်သောခုံအမှတ်ထည့်ပါ');</script>";
+    }
+    
+    $stmt->close();
+}
+
+$mysqli->close();
+
+// Function to convert numbers to Myanmar digits
+function convertToMyanmarDigits($number) {
+    $myanmarDigits = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+    $result = '';
+    $digits = str_split((string)$number);
+    foreach ($digits as $digit) {
+        if (is_numeric($digit)) {
+            $result .= $myanmarDigits[$digit];
+        }
+    }
+    return $result;
+}
 ?>
  <style>/* student_navbar.php ထဲ style များ (သို့) main CSS file ထဲ */
 nav.navbar {
@@ -97,14 +158,14 @@ nav.navbar {
                         </td>
                     </tr>
                     <tr>
-                        <td>ခုံအမှတ်</td>
-                        <td style="display: flex; gap: 5px; align-items: center;">
-                            <input type="text" name="serial_code" value="UCSMG-" readonly style="flex: 0 0 80px; background-color: #f1f1f1; border: 1px solid #ccc; text-align: center;">
-                            <input type="text" name="serial_no" id="serial_no" pattern="\d{5}" maxlength="5" placeholder="e.g., 24001" 
-                                   value="<?php echo isset($studentData['serial_no']) ? $studentData['serial_no'] : ''; ?>" 
-                                   class="form-control" onchange="fetchStudentData(this.value)" <?php echo isset($_GET['serial_no']) ? 'readonly' : 'required'; ?>>
-                        </td>
-                    </tr>
+                    <td>ခုံအမှတ်</td>
+                    <td style="display: flex; gap: 5px; align-items: center;">
+                        <input type="text" name="serial_code" value="UCSMG-" readonly style="flex: 0 0 80px; background-color: #f1f1f1; border: 1px solid #ccc; text-align: center;">
+                        <input type="text" name="serial_no" id="serial_no" pattern="\d{5}" maxlength="5" placeholder="e.g., 24001" 
+                            value="<?php echo isset($studentData['serial_no']) ? $studentData['serial_no'] : ''; ?>" 
+                            class="form-control" onchange="fetchStudentData(this.value)" <?php echo isset($_GET['serial_no']) ? 'readonly' : 'required'; ?>>
+                    </td>
+                </tr>
                     <tr>
                         <td>တက္ကသိုလ်ဝင်ရောက်သည့်ခုနှစ်</td>
                         <td>
@@ -583,180 +644,133 @@ nav.navbar {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script language="javascript" type="text/javascript">
 <script>
-        function nextPage(currentPage, nextPage) {
-            // Validate required fields before proceeding
-            let isValid = true;
-            $(`#page${currentPage} [required]`).each(function() {
-                if (!$(this).val()) {
-                    $(this).addClass('is-invalid');
-                    isValid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
+        // Debugging message
+        console.log("Application form script loaded");
 
-            if (!isValid) {
-                alert('Please fill in all required fields before proceeding.');
-                return;
-            }
+        // Photo upload preview
+         // Photo upload preview
+  document.getElementById("fileupload").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("preview").src = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
 
-            document.getElementById(`page${currentPage}`).classList.remove('active');
-            document.getElementById(`page${nextPage}`).classList.add('active');
-            
-            // Update progress bar
-            const progressPercentage = (nextPage / 2) * 100;
-            document.getElementById('formProgress').style.width = progressPercentage + '%';
-            document.getElementById('formProgress').setAttribute('aria-valuenow', progressPercentage);
-            document.getElementById('progressText').textContent = `စာမျက်နှာ ${nextPage}/2`;
-        }
-
-        function prevPage(currentPage, prevPage) {
-            document.getElementById(`page${currentPage}`).classList.remove('active');
-            document.getElementById(`page${prevPage}`).classList.add('active');
-            
-            // Update progress bar
-            const progressPercentage = (prevPage / 2) * 100;
-            document.getElementById('formProgress').style.width = progressPercentage + '%';
-            document.getElementById('formProgress').setAttribute('aria-valuenow', progressPercentage);
-            document.getElementById('progressText').textContent = `စာမျက်နှာ ${prevPage}/2`;
-        }
-
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    document.getElementById('preview').setAttribute('src', e.target.result);
-                }
-                
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
+  // Show modal if photo is required
+  document.getElementById("fileupload").addEventListener("invalid", function() {
+    var photoAlertModal = new bootstrap.Modal(document.getElementById('photoAlertModal'));
+    photoAlertModal.show();
+  });
+        
+        // Improved Myanmar digits validation
         function allowOnlyMyanmarDigits(input) {
-            // This function would need to be implemented to allow only Myanmar digits
-            // You would need to create a mapping of English digits to Myanmar digits
-            // and replace them as the user types
-        }
-
-        function fetchStudentData(serialNo) {
-            if (serialNo.length === 5) {
-                $.ajax({
-                    url: 'fetch_student_data.php',
-                    type: 'POST',
-                    data: { serial_no: serialNo },
-                    success: function(response) {
-                        try {
-                            const data = JSON.parse(response);
-                            if (data.success) {
-                                // Populate fields with fetched data
-                                $('input[name="student_name_my"]').val(data.student_name_my);
-                                $('input[name="student_name_en"]').val(data.student_name_en);
-                                $('input[name="father_name_my"]').val(data.father_name_my);
-                                $('input[name="mother_name_my"]').val(data.mother_name_my);
-                                $('input[name="father_name_en"]').val(data.father_name_en);
-                                $('input[name="mother_name_en"]').val(data.mother_name_en);
-                                $('input[name="nationality"]').val(data.nationality);
-                                $('input[name="father_ethnicity"]').val(data.father_ethnicity);
-                                $('input[name="mother_ethnicity"]').val(data.mother_ethnicity);
-                                $('input[name="religion"]').val(data.religion);
-                                $('input[name="father_religion"]').val(data.father_religion);
-                                $('input[name="mother_religion"]').val(data.mother_religion);
-                                $('input[name="birth_place"]').val(data.birth_place);
-                                $('input[name="father_birth_place"]').val(data.father_birth_place);
-                                $('input[name="mother_birth_place"]').val(data.mother_birth_place);
-                                $('input[name="nrc"]').val(data.nrc);
-                                $('input[name="father_nrc"]').val(data.father_nrc);
-                                $('input[name="mother_nrc"]').val(data.mother_nrc);
-                                $('input[name="dob"]').val(data.dob);
-                                $('input[name="father_address_home"]').val(data.father_address_home);
-                                $('input[name="father_address_street"]').val(data.father_address_street); 
-                                $('input[name="father_address_quarter"]').val(data.father_address_quarter);
-                                $('input[name="father_address_village"]').val(data.father_address_village);
-                                $('input[name="father_address_township"]').val(data.father_address_township);
-                                $('input[name="mother_address_house_no"]').val(data.mother_address_house_no);
-                                $('input[name="mother_address_street"]').val(data.mother_address_street);
-                                $('input[name="mother_address_quarter"]').val(data.mother_address_quarter);
-                                $('input[name="mother_address_village"]').val(data.mother_address_village);
-                                $('input[name="mother_address_township"]').val(data.mother_address_township);
-                                $('input[name="phone"]').val(data.phone);
-                                $('input[name="mother_phone"]').val(data.mother_phone);
-                                $('input[name="mother_job"]').val(data.mother_job);
-                                $('input[name="entrance_exam_year"]').val(data.entrance_exam_year);
-                                $('input[name="entrance_exam_center"]').val(data.entrance_exam_center);
-                                $('input[name="supporter_name"]').val(data.supporter_name);
-                                $('input[name="supporter_relation"]').val(data.supporter_relation);
-                                $('input[name="supporter_job"]').val(data.supporter_job);
-                                $('input[name="supporter_address"]').val(data.supporter_address);
-                                $('input[name="supporter_phone"]').val(data.supporter_phone);
-                                $('input[name="grant_support"]').val(data.grant_support);
-                                $('input[name="current_house_no"]').val(data.current_house_no);
-                                $('input[name="current_street_no"]').val(data.current_street_no);
-                                $('input[name="current_quarter"]').val(data.current_quarter);
-                                $('input[name="current_village"]').val(data.current_village);
-                                $('input[name="current_township"]').val(data.current_township);
-                                $('input[name="current_phone"]').val(data.current_phone);
-                                $('input[name="student_signature"]').val(data.student_signature);
-                                
-                                // Update image preview if exists
-                                if (data.image) {
-                                    $('#preview').attr('src', data.image);
-                                }
-                            } else {
-                                alert('Student not found.');
-                            }
-                        } catch (e) {
-                            console.error('Error parsing response:', e);
-                            alert('Error processing student data.');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX error:', status, error);
-                        alert('Error fetching student data. Please try again.');
-                    }
-                });
+            console.log("Validating input:", input.name);
+            const myanmarDigits = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+            let value = input.value;
+            let newValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (myanmarDigits.includes(value[i])) {
+                    newValue += value[i];
+                }
+            }
+            
+            input.value = newValue;
+            console.log("After validation:", newValue);
+            
+            // Auto-update end year when start year changes
+            if (input.name === 'academic_year_start' && newValue.length === 4) {
+                const startYear = convertMyanmarToNumber(newValue);
+                if (!isNaN(startYear)) {
+                    const endYearInput = document.querySelector('input[name="academic_year_end"]');
+                    endYearInput.value = convertNumberToMyanmar(startYear + 1);
+                    console.log("Auto-updated end year to:", endYearInput.value);
+                }
             }
         }
 
-        $(document).ready(function() {
-            // Highlight empty required fields
-            $('[required]').on('blur', function() {
-                if (!$(this).val()) {
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
+        // Helper functions with error handling
+        function convertMyanmarToNumber(myanmar) {
+            try {
+                const digitsMap = {'၀':0, '၁':1, '၂':2, '၃':3, '၄':4, '၅':5, '၆':6, '၇':7, '၈':8, '၉':9};
+                return parseInt(myanmar.split('').map(d => digitsMap[d]).join(''));
+            } catch (e) {
+                console.error("Conversion error:", e);
+                return NaN;
+            }
+        }
 
-            $('#serial_no').on('input', function() {
-                const serialNo = $(this).val();
-                if (serialNo.length === 5) {
-                    fetchStudentData(serialNo);
-                }
-            });
+        function convertNumberToMyanmar(num) {
+            try {
+                const digitsMap = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+                return num.toString().split('').map(d => digitsMap[d]).join('');
+            } catch (e) {
+                console.error("Conversion error:", e);
+                return "";
+            }
+        }
 
-            // Show photo alert if no photo is uploaded
-            $('#studentForm').on('submit', function(e) {
-                let isValid = true;
-                $('[required]').each(function() {
-                    if (!$(this).val()) {
-                        $(this).addClass('is-invalid');
-                        isValid = false;
-                    }
-                });
-
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please fill in all required fields.');
-                    return;
-                }
-
-                if (!$('input[name="image"]').val() && !$('#preview').attr('src').includes('data:image/svg+xml')) {
-                    e.preventDefault();
-                    $('#photoAlertModal').modal('show');
-                }
-            });
+        // Initialize form validation
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Document is fully loaded");
+            // Add any additional initialization code here
+        });
+        function nextPage(currentPage, nextPage) {
+            document.getElementById('page' + currentPage).style.display = 'none';
+            document.getElementById('page' + nextPage).style.display = 'block';
+        }
+        function prevPage(currentPage, prevPage) {
+            document.getElementById('page' + currentPage).style.display = 'none';
+            document.getElementById('page' + prevPage).style.display = 'block';
+        }
+        // Show the first page initially
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('page1').style.display = 'block';
+            document.getElementById('page2').style.display = 'none';
+        }); 
+        
+        // Handle form submission
+        document.getElementById('applicationForm').addEventListener('submit', function(event)
+        {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Validate photo upload
+            const fileInput = document.getElementById('fileupload');
+            if (fileInput.files.length === 0) {
+                var photoAlertModal = new bootstrap.Modal(document.getElementById('photoAlertModal'));
+                photoAlertModal.show();
+                return; // Stop form submission if no photo is uploaded
+            }
+            // If photo is uploaded, proceed with form submission
+            this.submit(); // Submit the form
+        });
+        });
+        // Debugging message
+        console.log("Form script initialized successfully");
+        // Show the first page initially
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('page1').style.display = 'block';
+            document.getElementById('page2').style.display = 'none';
+        });
+        // Handle form submission
+        document.getElementById('applicationForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Validate photo upload
+            const fileInput = document.getElementById('fileupload');
+            if (fileInput.files.length === 0) {
+                var photoAlertModal = new bootstrap.Modal(document.getElementById('photoAlertModal'));
+                photoAlertModal.show();
+                return; // Stop form submission if no photo is uploaded
+            }
+            // If photo is uploaded, proceed with form submission
+            this.submit(); // Submit the form
         });
     </script>
 </body>

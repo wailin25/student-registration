@@ -54,7 +54,7 @@
     <div class="mb-3">
       <div class="row mb-2">
         <div class="col-6">အမည်: <span class="line"></span></div>
-        <div class="col-6">အဖအမည်: <span class="line"></span></div>
+        <div class="col-6">ခုံအမှတ် <span class="line"></span></div>
       </div>
       <div class="row mb-2">
         <div class="col-6">တက္ကသိုလ်အမည်: <span class="line"> UCS(MGY)</span></div>

@@ -270,7 +270,7 @@ require 'includes/student_navbar.php';
     </div>
 
     <!-- Dashboard Content -->
-    <div class="dashboard-grid">
+    <div class="dashboard-grid" style="width: 700px;margin-left:250px;">
       <!-- Fee Calculator Card -->
       <div class="dashboard-card">
         <div class="card-header">
@@ -340,51 +340,10 @@ require 'includes/student_navbar.php';
       </div>
 
       <!-- Quick Links Card -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <i class="fas fa-link"></i>
-          <h3>Quick Links</h3>
-        </div>
-        
-        <div class="quick-links">
-          <a href="academic_calendar.php" class="btn btn-outline" style="width: 80%; margin-bottom: 10px;">
-            <i class="fas fa-calendar-alt"></i> Academic Calendar
-          </a>
-          
-          <a href="course_materials.php" class="btn btn-outline" style="width: 80%; margin-bottom: 10px;">
-            <i class="fas fa-book"></i> Course Materials
-          </a>
-          
-          <a href="exam_schedule.php" class="btn btn-outline" style="width: 80%; margin-bottom: 10px;">
-            <i class="fas fa-clipboard-list"></i> Exam Schedule
-          </a>
-          
-          <a href="profile.php" class="btn btn-outline" style="width: 80%;">
-            <i class="fas fa-user-cog"></i> Update Profile
-          </a>
-        </div>
-      </div>
+      
 
-      <!-- Announcements Card -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <i class="fas fa-bullhorn"></i>
-          <h3>Latest Announcements</h3>
-        </div>
         
-        <div class="announcement-list">
-          <div class="announcement-item">
-            <h4>Registration Deadline</h4>
-            <p>Final date for registration is Dec 15, 2026</p>
-            <small class="text-muted">Posted: Dec 1, 2026</small>
-          </div>
-          
-          <div class="announcement-item" style="margin-top: 15px;">
-            <h4>Semester Start Date</h4>
-            <p>New semester begins on Dcember 8, 2026</p>
-            <small class="text-muted">Posted: Dec 1, 2026</small>
-          </div>
-        </div>
+        
       </div>
     </div>
   </div>
